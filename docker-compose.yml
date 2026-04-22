@@ -5,7 +5,7 @@ services:
     build: .
     container_name: rex-gateway
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -19,99 +19,10 @@ services:
       - RATE_LIMIT_WINDOW_MS=900000
       - RATE_LIMIT_MAX_REQUESTS=100
       - REQUEST_TIMEOUT=30000
-    depends_on:
-      auth:
-        condition: service_healthy
-      identity:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-    networks:
-      - rex-network
     restart: unless-stopped
-
-  auth:
-    build:
-      context: ../rex-auth-server
-      dockerfile: Dockerfile
-    container_name: rex-auth-server
-    ports:
-      - "8000:8000"
-    environment:
-      - FLASK_APP=wsgi.py
-      - FLASK_ENV=production
-      - DATABASE_URL=mysql+pymysql://root:${DB_PASSWORD:-password}@mysql:3306/rex_auth
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - rex-network
-    restart: unless-stopped
-
-  identity:
-    build:
-      context: ../rex-identity-server
-      dockerfile: Dockerfile
-    container_name: rex-identity-server
-    ports:
-      - "8001:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/rex_identity
-      - JWT_SECRET=${JWT_IDENTITY_SECRET:-your_identity_secret_key_here}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - rex-network
-    restart: unless-stopped
-
-  mysql:
-    image: mysql:8.0
-    container_name: rex-mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-password}
-      - MYSQL_DATABASE=rex_auth
-    ports:
-      - "3309:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - rex-network
-    restart: unless-stopped
-
-  postgres:
-    image: postgres:15-alpine
-    container_name: rex-postgres
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_DB=rex_identity
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - rex-network
-    restart: unless-stopped
-
-networks:
-  rex-network:
-    driver: bridge
-
-volumes:
-  mysql_data:
-  postgres_data:
