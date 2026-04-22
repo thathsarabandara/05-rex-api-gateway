@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { createProxyMiddleware } from 'express-http-proxy';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.js';
 import identityRoutes from './routes/identity.js';
@@ -28,6 +29,7 @@ app.use(cors({
 // ==================== Request Parsing ====================
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(cookieParser());
 
 // ==================== Logging ====================
 app.use(morgan('combined'));
