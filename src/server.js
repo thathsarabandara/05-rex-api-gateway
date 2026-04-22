@@ -1,9 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
-import { createProxyMiddleware } from 'express-http-proxy';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 
@@ -12,8 +11,6 @@ import identityRoutes from './routes/identity.js';
 import healthRoutes from './routes/health.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requestLogger } from './middleware/logger.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +22,11 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 200
 }));
+
+// ==================== API Routes (Proxies) ====================
+// Note: Proxies must be mounted BEFORE body parsers to avoid hanging POST requests
+app.use('/api/auth', authRoutes);
+app.use('/api/identity', identityRoutes);
 
 // ==================== Request Parsing ====================
 app.use(express.json({ limit: '10mb' }));
@@ -49,9 +51,7 @@ app.use('/api/', limiter);
 // ==================== Health Check ====================
 app.use('/health', healthRoutes);
 
-// ==================== API Routes ====================
-app.use('/api/auth', authRoutes);
-app.use('/api/identity', identityRoutes);
+
 
 // ==================== Gateway Status ====================
 app.get('/gateway/status', (req, res) => {
