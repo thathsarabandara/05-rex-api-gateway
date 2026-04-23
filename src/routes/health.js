@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
   );
 
   const identityHealth = await checkServiceHealth(
-    process.env.IDENTITY_SERVER_URL,
+    `${process.env.IDENTITY_SERVER_URL}/api`,
     'Identity Server'
   );
 
