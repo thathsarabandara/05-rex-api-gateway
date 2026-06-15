@@ -5,20 +5,9 @@ services:
     build: .
     container_name: rex-gateway
     ports:
-      - "3001:3001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - LOG_LEVEL=info
-      - AUTH_SERVER_URL=http://host.docker.internal:8000
-      - IDENTITY_SERVER_URL=http://host.docker.internal:8001
-      - WEB_DASHBOARD_URL=http://localhost:5173
-      - ALLOWED_ORIGINS=http://localhost:5173
-      - JWT_AUTH_SECRET=${JWT_AUTH_SECRET:-your_auth_secret_key_here}
-      - JWT_IDENTITY_SECRET=${JWT_IDENTITY_SECRET:-your_identity_secret_key_here}
-      - RATE_LIMIT_WINDOW_MS=900000
-      - RATE_LIMIT_MAX_REQUESTS=100
-      - REQUEST_TIMEOUT=30000
+      - "9000:9000"
+    env_file:
+      - .env
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -28,3 +17,49 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
+    networks:
+      - rex_shared_network
+    depends_on:
+      mysql_server:
+        condition: service_healthy
+      redis_server:
+        condition: service_started
+
+  mysql_server:
+    image: mysql:8.0
+    container_name: rex-mysql-server
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rex_root_password}
+      MYSQL_USER: ${MYSQL_USER:-rex_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rex_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+    networks:
+      - rex_shared_network
+
+  redis_server:
+    image: redis:alpine
+    container_name: rex-redis-server
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - rex_shared_network
+
+networks:
+  rex_shared_network:
+    name: rex_shared_network
+    driver: bridge
+
+volumes:
+  mysql_data:
