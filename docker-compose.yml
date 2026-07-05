@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  gateway:
+  rex-api-gateway:
     build: .
-    container_name: rex-gateway
+    container_name: rex-api-gateway
     ports:
       - "9000:9000"
     env_file:
@@ -30,9 +30,9 @@ services:
     container_name: rex-mysql-server
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rex_root_password}
-      MYSQL_USER: ${MYSQL_USER:-rex_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-rex_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:

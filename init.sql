@@ -10,18 +10,18 @@ CREATE DATABASE IF NOT EXISTS rex_voice;
 CREATE DATABASE IF NOT EXISTS rex_agent;
 CREATE DATABASE IF NOT EXISTS rex_memory;
 
-CREATE USER IF NOT EXISTS 'thathsara'@'%' IDENTIFIED BY 'rex_password';
+CREATE USER IF NOT EXISTS 'thathsara'@'%' IDENTIFIED BY 'BandaPutha';
 
-GRANT ALL PRIVILEGES ON rex_auth.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_robot.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_telemetry.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_fusion.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_navigation.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_vision.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_event.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_notification.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_voice.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_agent.* TO 'rex_user'@'%';
-GRANT ALL PRIVILEGES ON rex_memory.* TO 'rex_user'@'%';
+GRANT ALL PRIVILEGES ON rex_auth.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_robot.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_telemetry.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_fusion.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_navigation.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_vision.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_event.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_notification.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_voice.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_agent.* TO 'thathsara'@'%';
+GRANT ALL PRIVILEGES ON rex_memory.* TO 'thathsara'@'%';
 
 FLUSH PRIVILEGES;

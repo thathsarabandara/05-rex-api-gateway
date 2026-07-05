@@ -9,7 +9,7 @@ router.use('/', createProxyMiddleware({
   target: AUTH_SERVER_URL,
   changeOrigin: true,
   pathRewrite: (path, req) => {
-    return req.originalUrl.replace(/^\/api\/auth/, '/auth');
+    return req.originalUrl.replace(/^\/api\/auth/, '/api/auth');
   },
   logLevel: 'debug',
 }));

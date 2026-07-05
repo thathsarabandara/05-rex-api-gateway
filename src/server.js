@@ -34,7 +34,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cookieParser());
 
 // ==================== Logging ====================
-app.use(morgan('combined'));
+if (process.env.ENV === 'dev' || process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 app.use(requestLogger);
 
 // ==================== Rate Limiting ====================
