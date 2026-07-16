@@ -1,16 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
 import app from '../src/app.js';
 import { config } from '../src/config/env.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
-
-function signRobotToken(payload: any) {
-  return jwt.sign(payload, config.ROBOT_JWT_SECRET_KEY, { algorithm: config.ROBOT_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken, signRobotToken, RobotJwtPayload } from './helpers.js';
 
 describe('Robot Authentication Middleware', () => {
   const validRobotPayload = {
@@ -105,11 +97,11 @@ describe('Robot Authentication Middleware', () => {
   });
 
   it('should reject robot token with missing sub', async () => {
-    const invalidPayload = {
+    const invalidPayload: Omit<RobotJwtPayload, 'sub'> & { sub?: string } = {
       ...validRobotPayload
     };
-    delete (invalidPayload as any).sub;
-    const token = signRobotToken(invalidPayload);
+    delete invalidPayload.sub;
+    const token = signRobotToken(invalidPayload as RobotJwtPayload);
     const res = await request(app)
       .get('/api/v1/device/config')
       .set('Authorization', `Bearer ${token}`)

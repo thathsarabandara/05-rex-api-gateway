@@ -1,17 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
 import nock from 'nock';
 import app from '../src/app.js';
 import { config } from '../src/config/env.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
-
-function signRobotToken(payload: any) {
-  return jwt.sign(payload, config.ROBOT_JWT_SECRET_KEY, { algorithm: config.ROBOT_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken, signRobotToken } from './helpers.js';
 
 describe('Internal Headers Middleware and Spoofing Removal', () => {
   const userPayload = {

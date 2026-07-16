@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { RouteNotFoundError } from '../utils/errors.js';
 import { sendGatewayError } from '../utils/responses.js';
 

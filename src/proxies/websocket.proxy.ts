@@ -8,7 +8,7 @@ import { TokenService } from '../services/token.service.js';
 import { wsConnectionLimiter, joystickLimiter, armControlLimiter } from '../services/rate-limit.service.js';
 import { removeSpoofedHeaders } from '../utils/headers.js';
 
-const WS_PATH_REGEX = /^\/api\/v1\/ws\/robots\/([^\/]+)\/(control|arm|status|telemetry|vision|agent)$/;
+const WS_PATH_REGEX = /^\/api\/v1\/ws\/robots\/([^/]+)\/(control|arm|status|telemetry|vision|agent)$/;
 const HOP_BY_HOP_HEADERS = [
   'connection',
   'upgrade',
@@ -53,8 +53,8 @@ export function handleWebSocketUpgrade(req: IncomingMessage, socket: Socket, hea
           if (isClosed) return;
           isClosed = true;
           logger.info('[WS Proxy] Socket.IO connection closed');
-          try { clientWs.close(); } catch {}
-          try { downstreamWs.close(); } catch {}
+          try { clientWs.close(); } catch { /* intentionally empty */ }
+          try { downstreamWs.close(); } catch { /* intentionally empty */ }
         };
 
         clientWs.on('message', (data: Buffer, isBinary: boolean) => {
@@ -120,11 +120,12 @@ export function handleWebSocketUpgrade(req: IncomingMessage, socket: Socket, hea
       return;
     }
 
-    let userAuth: any;
+    let userAuth: { sub: string; session_id: string; email_verified: boolean };
     try {
       userAuth = TokenService.verifyUserToken(token);
-    } catch (error: any) {
-      logger.warn({ path: urlPath, error: error.message }, '[WS Upgrade] Authentication failed');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Authentication failed';
+      logger.warn({ path: urlPath, error: message }, '[WS Upgrade] Authentication failed');
       socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
       socket.destroy();
       return;
@@ -185,12 +186,12 @@ export function handleWebSocketUpgrade(req: IncomingMessage, socket: Socket, hea
           if (clientWs.readyState === WebSocket.OPEN) {
             clientWs.close(code, reason);
           }
-        } catch {}
+        } catch { /* intentionally empty */ }
         try {
           if (downstreamWs.readyState === WebSocket.OPEN) {
             downstreamWs.close(code, reason);
           }
-        } catch {}
+        } catch { /* intentionally empty */ }
       };
 
       // Client socket handlers

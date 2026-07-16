@@ -24,7 +24,7 @@ function makeMiddleware(limiter: RateLimiterAbstract, keyGen: (req: Request) => 
       res.setHeader('X-RateLimit-Reset', new Date(Date.now() + result.msBeforeNext).toISOString());
 
       next();
-    } catch (rejected: any) {
+    } catch (rejected: unknown) {
       if (rejected instanceof Error) {
         // Log Redis connection error but fail open to keep service operational
         logger.error({ error: rejected, key }, '[RateLimiter] Redis connection failure - failing open');
@@ -32,10 +32,11 @@ function makeMiddleware(limiter: RateLimiterAbstract, keyGen: (req: Request) => 
         return;
       }
 
+      const rlResult = rejected as { msBeforeNext: number };
       res.setHeader('X-RateLimit-Limit', limiter.points);
       res.setHeader('X-RateLimit-Remaining', 0);
-      res.setHeader('X-RateLimit-Reset', new Date(Date.now() + rejected.msBeforeNext).toISOString());
-      res.setHeader('Retry-After', Math.ceil(rejected.msBeforeNext / 1000));
+      res.setHeader('X-RateLimit-Reset', new Date(Date.now() + rlResult.msBeforeNext).toISOString());
+      res.setHeader('Retry-After', Math.ceil(rlResult.msBeforeNext / 1000));
 
       return sendGatewayError(
         res,

@@ -12,8 +12,12 @@ let config: EnvConfig;
 
 try {
   config = envSchema.parse(process.env);
-} catch (error: any) {
-  console.error('❌ Environment configuration validation failed:', error.format());
+} catch (error: unknown) {
+  interface ZodErrorLike { format?: () => unknown; message: string; }
+  const formatted = error instanceof Error
+    ? (error as ZodErrorLike).format?.() ?? error.message
+    : String(error);
+  console.error('❌ Environment configuration validation failed:', formatted);
   process.exit(1);
 }
 

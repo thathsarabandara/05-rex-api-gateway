@@ -20,7 +20,8 @@ export const httpLogger = pinoHttp({
     return 'info';
   },
   genReqId: (req) => {
-    return (req as any).requestId || req.headers['x-request-id'] || 'unknown';
+    type RequestWithId = import('http').IncomingMessage & { requestId?: string };
+    return (req as RequestWithId).requestId || req.headers['x-request-id'] || 'unknown';
   },
   redact: {
     paths: [

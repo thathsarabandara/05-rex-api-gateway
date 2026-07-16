@@ -1,13 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import nock from 'nock';
-import jwt from 'jsonwebtoken';
 import app from '../src/app.js';
 import { config } from '../src/config/env.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken } from './helpers.js';
 
 describe('Robot Service HTTP Proxy Routing', () => {
   const userPayload = {

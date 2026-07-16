@@ -26,8 +26,9 @@ export function robotAuthMiddleware(req: Request, res: Response, next: NextFunct
     };
 
     next();
-  } catch (error: any) {
-    const err = error instanceof UnauthorizedError ? error : new UnauthorizedError(error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Authentication failed';
+    const err = error instanceof UnauthorizedError ? error : new UnauthorizedError(message);
     return sendGatewayError(res, err, req.requestId || '');
   }
 }

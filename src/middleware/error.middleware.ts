@@ -6,8 +6,15 @@ import { logger } from '../config/logger.js';
 /**
  * Global Express error handling middleware to catch unhandled errors
  */
+interface NodeError {
+  message?: string;
+  status?: number;
+  statusCode?: number;
+  code?: string;
+}
+
 export function errorMiddleware(
-  error: any,
+  error: NodeError,
   req: Request,
   res: Response,
   next: NextFunction

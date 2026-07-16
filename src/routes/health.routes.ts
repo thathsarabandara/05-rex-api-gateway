@@ -53,8 +53,9 @@ router.get('/metrics', async (_req, res) => {
   try {
     res.set('Content-Type', register.contentType);
     res.end(await register.metrics());
-  } catch (error: any) {
-    res.status(500).end(error.message || error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(500).end(message || error);
   }
 });
 

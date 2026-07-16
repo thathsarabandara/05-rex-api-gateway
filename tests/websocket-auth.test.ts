@@ -2,13 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import http from 'http';
 import { AddressInfo } from 'net';
 import WebSocket from 'ws';
-import jwt from 'jsonwebtoken';
 import { handleWebSocketUpgrade } from '../src/proxies/websocket.proxy.js';
 import { config } from '../src/config/env.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken } from './helpers.js';
 
 describe('WebSocket Authentication Handshake', () => {
   let server: http.Server;

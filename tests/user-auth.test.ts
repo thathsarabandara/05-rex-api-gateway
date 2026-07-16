@@ -3,10 +3,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from '../src/app.js';
 import { config } from '../src/config/env.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken } from './helpers.js';
 
 describe('User Authentication Middleware', () => {
   const validPayload = {

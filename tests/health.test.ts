@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
 import nock from 'nock';
-import { register, Registry } from 'prom-client';
+import { Registry } from 'prom-client';
 import app from '../src/app.js';
 import { HealthService } from '../src/services/health.service.js';
 import { redis } from '../src/config/redis.js';
@@ -86,7 +86,7 @@ describe('Health and Metrics Endpoints', () => {
   });
 
   it('should return false for checkRedis when ping returns a non-PONG value', async () => {
-    const spy = vi.spyOn(redis, 'ping').mockResolvedValueOnce('NOT-PONG' as any);
+    const spy = vi.spyOn(redis, 'ping').mockResolvedValueOnce('NOT-PONG' as unknown as 'PONG');
     const isUp = await HealthService.checkRedis();
     expect(isUp).toBe(false);
     spy.mockRestore();

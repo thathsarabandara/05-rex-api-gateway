@@ -24,8 +24,9 @@ export class TokenService {
       }
 
       return payload;
-    } catch (error: any) {
-      throw new UnauthorizedError(error.message || 'Invalid user token');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Invalid user token';
+      throw new UnauthorizedError(message);
     }
   }
 
@@ -49,8 +50,9 @@ export class TokenService {
       }
 
       return payload;
-    } catch (error: any) {
-      throw new UnauthorizedError(error.message || 'Invalid robot token');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Invalid robot token';
+      throw new UnauthorizedError(message);
     }
   }
 }

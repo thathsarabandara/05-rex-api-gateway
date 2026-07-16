@@ -97,12 +97,12 @@ describe('Utility and Helper Functions', () => {
   describe('error.middleware.ts', () => {
     it('should handle GatewayError', () => {
       const err = new errors.BadRequestError('Invalid parameter');
-      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as any;
+      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as import('express').Request;
       const res = {
         headersSent: false,
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       errorMiddleware(err, req, res, next);
@@ -120,12 +120,12 @@ describe('Utility and Helper Functions', () => {
 
     it('should handle ECONNREFUSED network errors', () => {
       const err = { code: 'ECONNREFUSED' };
-      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as any;
+      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as import('express').Request;
       const res = {
         headersSent: false,
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       errorMiddleware(err, req, res, next);
@@ -143,12 +143,12 @@ describe('Utility and Helper Functions', () => {
 
     it('should handle ETIMEOUT network errors', () => {
       const err = { code: 'ETIMEOUT' };
-      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as any;
+      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as import('express').Request;
       const res = {
         headersSent: false,
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       errorMiddleware(err, req, res, next);
@@ -158,12 +158,12 @@ describe('Utility and Helper Functions', () => {
 
     it('should handle general Error', () => {
       const err = new Error('Something broke');
-      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as any;
+      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as import('express').Request;
       const res = {
         headersSent: false,
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       errorMiddleware(err, req, res, next);
@@ -173,10 +173,10 @@ describe('Utility and Helper Functions', () => {
 
     it('should delegate to next if headers are already sent', () => {
       const err = new Error('headers sent');
-      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as any;
+      const req = { requestId: 'req-123', path: '/foo', method: 'GET' } as import('express').Request;
       const res = {
         headersSent: true
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       errorMiddleware(err, req, res, next);
@@ -187,35 +187,35 @@ describe('Utility and Helper Functions', () => {
 
   describe('request-size.middleware.ts', () => {
     it('should pass if no Content-Length is provided', () => {
-      const req = { headers: {}, path: '/foo' } as any;
-      const res = {} as any;
+      const req = { headers: {}, path: '/foo' } as import('express').Request;
+      const res = {} as import('express').Response;
       const next = vi.fn();
       requestSizeMiddleware(req, res, next);
       expect(next).toHaveBeenCalled();
     });
 
     it('should pass if Content-Length is not a number', () => {
-      const req = { headers: { 'content-length': 'invalid' }, path: '/foo' } as any;
-      const res = {} as any;
+      const req = { headers: { 'content-length': 'invalid' }, path: '/foo' } as import('express').Request;
+      const res = {} as import('express').Response;
       const next = vi.fn();
       requestSizeMiddleware(req, res, next);
       expect(next).toHaveBeenCalled();
     });
 
     it('should reject if Content-Length exceeds JSON limit', () => {
-      const req = { headers: { 'content-length': String(3 * 1024 * 1024) }, path: '/api/v1/auth/login' } as any;
+      const req = { headers: { 'content-length': String(3 * 1024 * 1024) }, path: '/api/v1/auth/login' } as import('express').Request;
       const res = {
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
       requestSizeMiddleware(req, res, next);
       expect(res.status).toHaveBeenCalledWith(413);
     });
 
     it('should pass if Content-Length exceeds JSON limit but is upload path and below upload limit', () => {
-      const req = { headers: { 'content-length': String(3 * 1024 * 1024) }, path: '/api/v1/profile/me/picture' } as any;
-      const res = {} as any;
+      const req = { headers: { 'content-length': String(3 * 1024 * 1024) }, path: '/api/v1/profile/me/picture' } as import('express').Request;
+      const res = {} as import('express').Response;
       const next = vi.fn();
       requestSizeMiddleware(req, res, next);
       expect(next).toHaveBeenCalled();
@@ -224,8 +224,8 @@ describe('Utility and Helper Functions', () => {
 
   describe('request-id.middleware.ts', () => {
     it('should reuse client-provided request ID', () => {
-      const req = { headers: { 'x-request-id': 'client-uuid-999' } } as any;
-      const res = { setHeader: vi.fn() } as any;
+      const req = { headers: { 'x-request-id': 'client-uuid-999' } } as import('express').Request;
+      const res = { setHeader: vi.fn() } as unknown as import('express').Response;
       const next = vi.fn();
 
       requestIdMiddleware(req, res, next);
@@ -235,8 +235,8 @@ describe('Utility and Helper Functions', () => {
     });
 
     it('should generate a new request ID if client did not provide one', () => {
-      const req = { headers: {} } as any;
-      const res = { setHeader: vi.fn() } as any;
+      const req = { headers: {} } as import('express').Request;
+      const res = { setHeader: vi.fn() } as unknown as import('express').Response;
       const next = vi.fn();
 
       requestIdMiddleware(req, res, next);
@@ -248,11 +248,11 @@ describe('Utility and Helper Functions', () => {
 
   describe('security.middleware.ts', () => {
     it('should reject requests without Host header', () => {
-      const req = { headers: {} } as any;
+      const req = { headers: {} } as import('express').Request;
       const res = {
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       hostValidationMiddleware(req, res, next);
@@ -261,11 +261,11 @@ describe('Utility and Helper Functions', () => {
     });
 
     it('should reject requests with untrusted Host header', () => {
-      const req = { headers: { host: 'malicious.com' } } as any;
+      const req = { headers: { host: 'malicious.com' } } as import('express').Request;
       const res = {
         status: vi.fn().mockReturnThis(),
         json: vi.fn()
-      } as any;
+      } as unknown as import('express').Response;
       const next = vi.fn();
 
       hostValidationMiddleware(req, res, next);
@@ -285,8 +285,8 @@ describe('Utility and Helper Functions', () => {
 
   describe('proxy.factory.ts handleProxyError', () => {
     it('should return immediately if headers are already sent', () => {
-      const req = { requestId: 'req-123' } as any;
-      const res = { headersSent: true, status: vi.fn(), json: vi.fn() } as any;
+      const req = { requestId: 'req-123' } as import('express').Request;
+      const res = { headersSent: true, status: vi.fn(), json: vi.fn() } as unknown as import('express').Response;
       
       const result = handleProxyError(new Error('crash'), req, res, 'auth-service');
       expect(result).toBeUndefined();
@@ -294,24 +294,24 @@ describe('Utility and Helper Functions', () => {
     });
 
     it('should handle host resolution failure (ENOTFOUND)', () => {
-      const req = { requestId: 'req-123' } as any;
-      const res = { headersSent: false, status: vi.fn().mockReturnThis(), json: vi.fn() } as any;
+      const req = { requestId: 'req-123' } as import('express').Request;
+      const res = { headersSent: false, status: vi.fn().mockReturnThis(), json: vi.fn() } as unknown as import('express').Response;
       
       handleProxyError({ code: 'ENOTFOUND' }, req, res, 'auth-service');
       expect(res.status).toHaveBeenCalledWith(502);
     });
 
     it('should handle connection reset (ECONNRESET)', () => {
-      const req = { requestId: 'req-123' } as any;
-      const res = { headersSent: false, status: vi.fn().mockReturnThis(), json: vi.fn() } as any;
+      const req = { requestId: 'req-123' } as import('express').Request;
+      const res = { headersSent: false, status: vi.fn().mockReturnThis(), json: vi.fn() } as unknown as import('express').Response;
       
       handleProxyError({ code: 'ECONNRESET' }, req, res, 'auth-service');
       expect(res.status).toHaveBeenCalledWith(504);
     });
 
     it('should handle unknown proxy failures', () => {
-      const req = { requestId: 'req-123' } as any;
-      const res = { headersSent: false, status: vi.fn().mockReturnThis(), json: vi.fn() } as any;
+      const req = { requestId: 'req-123' } as import('express').Request;
+      const res = { headersSent: false, status: vi.fn().mockReturnThis(), json: vi.fn() } as unknown as import('express').Response;
       
       handleProxyError({ code: 'OTHER' }, req, res, 'auth-service');
       expect(res.status).toHaveBeenCalledWith(502);
@@ -331,7 +331,7 @@ describe('Utility and Helper Functions', () => {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         readableLength: 0
-      } as any;
+      } as import('express').Request;
       
       handleProxyReq(mockProxyReq, req, 'auth-service');
       expect(mockProxyReq.setHeader).toHaveBeenCalledWith('Content-Length', expect.any(Number));
@@ -346,7 +346,7 @@ describe('Utility and Helper Functions', () => {
       const req = {
         body: undefined,
         readableLength: 0
-      } as any;
+      } as import('express').Request;
 
       handleProxyReq(mockProxyReq, req, 'auth-service');
       expect(mockProxyReq.setHeader).not.toHaveBeenCalled();

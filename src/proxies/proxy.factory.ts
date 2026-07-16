@@ -1,5 +1,6 @@
 import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
 import { Request, Response, NextFunction } from 'express';
+import type { ClientRequest, IncomingMessage, ServerResponse } from 'http';
 import { logger } from '../config/logger.js';
 import { sendRawError } from '../utils/responses.js';
 
@@ -12,10 +13,10 @@ export interface ServiceProxyOptions {
 /**
  * Shared proxy request listener that fixes body payload formatting
  */
-export function handleProxyReq(proxyReq: any, req: Request, serviceName: string) {
+export function handleProxyReq(proxyReq: ClientRequest, req: Request, serviceName: string) {
   logger.debug(
     { serviceName, method: req.method, path: req.path, requestId: req.requestId },
-    `[Proxy] Routing HTTP request`
+    '[Proxy] Routing HTTP request'
   );
 
   if (req.body) {
@@ -26,21 +27,21 @@ export function handleProxyReq(proxyReq: any, req: Request, serviceName: string)
 /**
  * Shared error handling logic for microservice proxies
  */
-export function handleProxyError(error: any, req: Request, res: any, serviceName: string) {
+export function handleProxyError(error: Error & { code?: string }, req: Request, res: ServerResponse | Response, serviceName: string) {
   const requestId = req.requestId || '';
   logger.error(
     { error, serviceName, path: req.path, requestId },
-    `[Proxy Error] Request proxy forwarding failed`
+    '[Proxy Error] Request proxy forwarding failed'
   );
 
-  if (res.headersSent) {
+  if ((res as ServerResponse).headersSent) {
     return;
   }
 
   // Return standard 502/504 error depending on internal connection failure
   if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
     return sendRawError(
-      res,
+      res as Response,
       502,
       'SERVICE_UNAVAILABLE',
       'Downstream service is currently unreachable',
@@ -50,7 +51,7 @@ export function handleProxyError(error: any, req: Request, res: any, serviceName
 
   if (error.code === 'ETIMEOUT' || error.code === 'ECONNRESET') {
     return sendRawError(
-      res,
+      res as Response,
       504,
       'GATEWAY_TIMEOUT',
       'Downstream service timeout',
@@ -59,7 +60,7 @@ export function handleProxyError(error: any, req: Request, res: any, serviceName
   }
 
   return sendRawError(
-    res,
+    res as Response,
     502,
     'SERVICE_UNAVAILABLE',
     'Downstream service communication failure',
@@ -82,13 +83,13 @@ export function createServiceProxy(options: ServiceProxyOptions) {
       proxyReq: (proxyReq, req: Request) => {
         handleProxyReq(proxyReq, req, serviceName);
       },
-      error: (error: any, req: Request, res: any) => {
+      error: (error: Error, req: Request, res: ServerResponse) => {
         handleProxyError(error, req, res, serviceName);
       },
-      proxyRes: (proxyRes, req: Request) => {
+      proxyRes: (proxyRes: IncomingMessage, req: Request) => {
         logger.debug(
           { serviceName, statusCode: proxyRes.statusCode, requestId: req.requestId },
-          `[Proxy Response] Routed HTTP response received`
+          '[Proxy Response] Routed HTTP response received'
         );
       }
     }

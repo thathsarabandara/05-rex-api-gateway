@@ -7,14 +7,14 @@ vi.mock('ioredis', () => {
     default: class MockRedis {
       async ping() { return 'PONG'; }
       async quit() { return 'OK'; }
-      on(event: string, cb: any) {
+      on(event: string, cb: (...args: unknown[]) => void) {
         if (event === 'connect') setTimeout(cb, 0);
       }
     },
     Redis: class MockRedis {
       async ping() { return 'PONG'; }
       async quit() { return 'OK'; }
-      on(event: string, cb: any) {
+      on(event: string, cb: (...args: unknown[]) => void) {
         if (event === 'connect') setTimeout(cb, 0);
       }
     }

@@ -9,7 +9,7 @@ const server = http.createServer(app);
 
 // Intercept HTTP upgrades for WebSockets (joystick, status, agent, Socket.IO, etc.)
 server.on('upgrade', (req, socket, head) => {
-  handleWebSocketUpgrade(req, socket as any, head);
+  handleWebSocketUpgrade(req, socket as import('net').Socket, head);
 });
 
 server.listen(config.PORT, () => {

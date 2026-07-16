@@ -1,15 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import request from 'supertest';
-import jwt from 'jsonwebtoken';
 import nock from 'nock';
 import app from '../src/app.js';
 import * as limiters from '../src/services/rate-limit.service.js';
 import { robotRegisterRateLimit } from '../src/middleware/rate-limit.middleware.js';
 import { config } from '../src/config/env.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken } from './helpers.js';
 
 describe('Rate Limiting Middleware', () => {
   const userPayload = {
@@ -96,10 +92,10 @@ describe('Rate Limiting Middleware', () => {
       ip: '127.0.0.1',
       socket: {},
       headers: {}
-    } as any;
+    } as import('express').Request;
     const res = {
       setHeader: vi.fn(),
-    } as any;
+    } as unknown as import('express').Response;
     const next = vi.fn();
 
     await robotRegisterRateLimit(req, res, next);

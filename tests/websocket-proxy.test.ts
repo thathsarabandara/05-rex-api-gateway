@@ -2,15 +2,11 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import http from 'http';
 import { AddressInfo } from 'net';
 import WebSocket, { WebSocketServer } from 'ws';
-import jwt from 'jsonwebtoken';
 import nock from 'nock';
 import { handleWebSocketUpgrade } from '../src/proxies/websocket.proxy.js';
 import { config } from '../src/config/env.js';
 import * as limiters from '../src/services/rate-limit.service.js';
-
-function signUserToken(payload: any) {
-  return jwt.sign(payload, config.USER_JWT_SECRET_KEY, { algorithm: config.USER_JWT_ALGORITHM as jwt.Algorithm });
-}
+import { signUserToken } from './helpers.js';
 
 describe('WebSocket Proxy Bridging and Limits', () => {
   let gatewayServer: http.Server;
