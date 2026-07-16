@@ -134,4 +134,35 @@ describe('Rate Limiting Middleware', () => {
       expect(res.status).toBe(200);
     }
   });
+
+  it('should fall back to socket.remoteAddress when req.ip is undefined', async () => {
+    const req = {
+      ip: undefined,
+      socket: { remoteAddress: '10.0.0.1' },
+      headers: {}
+    } as import('express').Request;
+    const res = {
+      setHeader: vi.fn(),
+    } as unknown as import('express').Response;
+    const next = vi.fn();
+
+    await robotRegisterRateLimit(req, res, next);
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('should fall back to "unknown" when both req.ip and socket.remoteAddress are missing', async () => {
+    const req = {
+      ip: undefined,
+      socket: { remoteAddress: undefined },
+      headers: {}
+    } as import('express').Request;
+    const res = {
+      setHeader: vi.fn(),
+    } as unknown as import('express').Response;
+    const next = vi.fn();
+
+    await robotRegisterRateLimit(req, res, next);
+    expect(next).toHaveBeenCalled();
+  });
 });
+

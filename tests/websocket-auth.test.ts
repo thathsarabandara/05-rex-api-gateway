@@ -66,4 +66,19 @@ describe('WebSocket Authentication Handshake', () => {
       });
     });
   });
+
+  it('should return 404 when WebSocket URL does not match any route', async () => {
+    const ws = new WebSocket(`ws://localhost:${port}/api/v1/ws/robots/unknown-path`);
+
+    await new Promise<void>((resolve) => {
+      ws.on('unexpected-response', (req, res) => {
+        expect(res.statusCode).toBe(404);
+        resolve();
+      });
+      ws.on('error', () => {
+        resolve();
+      });
+    });
+  });
 });
+

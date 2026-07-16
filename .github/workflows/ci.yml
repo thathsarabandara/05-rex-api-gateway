@@ -87,10 +87,22 @@ jobs:
       - name: Run test suite
         run: npm run test:coverage
         env:
+          NODE_ENV: test
           REDIS_URL: redis://localhost:6379/3
+          AUTH_SERVICE_URL: http://127.0.0.1:8001
+          ROBOT_SERVICE_URL: http://127.0.0.1:8002
+          NOTIFICATION_SERVICE_URL: http://127.0.0.1:8003
+          TELEMETRY_SERVICE_URL: http://127.0.0.1:8004
+          VISION_SERVICE_URL: http://127.0.0.1:8005
+          EVENT_SERVICE_URL: http://127.0.0.1:8006
+          VOICE_SERVICE_URL: http://127.0.0.1:8007
+          AGENT_SERVICE_URL: http://127.0.0.1:8008
+          MEMORY_SERVICE_URL: http://127.0.0.1:8009
           USER_JWT_SECRET_KEY: test-user-jwt-secret-must-be-long-enough-key-value-here
           ROBOT_JWT_SECRET_KEY: test-robot-jwt-secret-must-be-long-enough-key-value-here
           INTERNAL_SERVICE_TOKEN: test-internal-service-token
+          ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
+          ALLOWED_HOSTS: localhost,127.0.0.1
 
   build:
     name: "6 · Build"

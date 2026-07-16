@@ -352,4 +352,70 @@ describe('Utility and Helper Functions', () => {
       expect(mockProxyReq.setHeader).not.toHaveBeenCalled();
     });
   });
+
+  describe('security.middleware.ts — additional branches', () => {
+    it('should allow requests with no Origin header (non-browser clients)', async () => {
+      // Non-browser clients (mobile apps, curl) send no Origin header — CORS should allow them
+      const res = await request(app)
+        .get('/health/live')
+        .set('Host', 'localhost')
+        .unset('Origin');
+
+      expect(res.status).toBe(200);
+    });
+
+    it('should allow requests from an allowed CORS origin', async () => {
+      const res = await request(app)
+        .get('/health/live')
+        .set('Host', 'localhost')
+        .set('Origin', 'http://localhost:3000');
+
+      expect(res.status).toBe(200);
+    });
+
+    it('should allow requests with Host header containing a port', () => {
+      const req = { headers: { host: 'localhost:8080' } } as import('express').Request;
+      const res = {} as import('express').Response;
+      const next = vi.fn();
+
+      hostValidationMiddleware(req, res, next);
+
+      // localhost is in ALLOWED_HOSTS — port is stripped correctly
+      expect(next).toHaveBeenCalled();
+    });
+  });
+
+  describe('request-size.middleware.ts — additional branches', () => {
+    it('should reject if Content-Length exceeds upload limit on upload path', () => {
+      // 7 MB exceeds the 6 MB upload limit
+      const req = {
+        headers: { 'content-length': String(7 * 1024 * 1024) },
+        path: '/api/v1/profile/me/picture'
+      } as import('express').Request;
+      const res = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn()
+      } as unknown as import('express').Response;
+      const next = vi.fn();
+
+      requestSizeMiddleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(413);
+    });
+
+    it('should pass if Content-Length is within JSON body limit', () => {
+      // 500 KB is well within the 2 MB default limit
+      const req = {
+        headers: { 'content-length': String(500 * 1024) },
+        path: '/api/v1/auth/login'
+      } as import('express').Request;
+      const res = {} as import('express').Response;
+      const next = vi.fn();
+
+      requestSizeMiddleware(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+    });
+  });
 });
+
