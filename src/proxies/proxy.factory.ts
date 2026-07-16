@@ -80,15 +80,15 @@ export function createServiceProxy(options: ServiceProxyOptions) {
     proxyTimeout: timeoutMs,
     timeout: timeoutMs,
     on: {
-      proxyReq: (proxyReq, req: Request) => {
-        handleProxyReq(proxyReq, req, serviceName);
+      proxyReq: (proxyReq, req) => {
+        handleProxyReq(proxyReq, req as unknown as Request, serviceName);
       },
-      error: (error: Error, req: Request, res: ServerResponse) => {
-        handleProxyError(error, req, res, serviceName);
+      error: (error, req, res) => {
+        handleProxyError(error, req as unknown as Request, res as ServerResponse, serviceName);
       },
-      proxyRes: (proxyRes: IncomingMessage, req: Request) => {
+      proxyRes: (proxyRes, req) => {
         logger.debug(
-          { serviceName, statusCode: proxyRes.statusCode, requestId: req.requestId },
+          { serviceName, statusCode: proxyRes.statusCode, requestId: (req as unknown as Request).requestId },
           '[Proxy Response] Routed HTTP response received'
         );
       }
